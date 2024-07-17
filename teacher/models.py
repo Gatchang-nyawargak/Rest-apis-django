@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.manager import BaseManager
 
 # Create your models here.
 class Teacher(models.Model):
@@ -13,6 +14,9 @@ class Teacher(models.Model):
     teacher_status = models.CharField(max_length=20)
     enrollment_date = models.DateField()
     teacher_photo = models.ImageField(upload_to='teacher_photos')
+    
+    
+    objects: BaseManager["Course"]
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
