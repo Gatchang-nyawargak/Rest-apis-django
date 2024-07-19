@@ -2,7 +2,6 @@ from django.db import models
 from course.models import Course
 from django.db.models.manager import BaseManager
 from django.db import models
-from datetime import time
 
 
 # Create your models here.
