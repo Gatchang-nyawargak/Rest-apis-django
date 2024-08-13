@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from api.serializer import StudentSerializer, ClassPeriodSerializer, CourseSerializer, TeacherSerializer,ClassProjectSerializer
 from rest_framework import status
-
 from student.models import Student
+
 from teacher.models import Teacher
 from course.models import Course
 from rest_framework.views import APIView
@@ -22,7 +22,15 @@ from ClassProject.models import Class_Project
 class StudentListView(APIView):
     def get(self, request):
         students = Student.objects.all()
-        serializer = StudentSerializer(students,many=True)
+        first_name = request.query_params.get("first_name")
+        country = request.query_params.get("country")  
+
+        if first_name:
+            students = students.filter(first_name=first_name)
+        if country: 
+            students = students.filter(country=country)
+        
+        serializer = StudentSerializer(students, many=True)
         return Response(serializer.data)
              
 class studentDetailView(APIView):
@@ -30,26 +38,17 @@ class studentDetailView(APIView):
         student = Student.objects.get(id = id)
         serializer = StudentSerializer(student)
         return Response(serializer.data)
-    def post(self,request):
-        serializer = StudentSerializer(data=request.data)
-        if serializer.is_valid():
-            return Response(serializer.data,status= status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        
-    def put(self,request,id):
-        student=Student.objects.get(id=id)
-        serializer =StudentSerializer (student)
-        if serializer.is_valid():
-            serializer.save
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    def delete(self, request,id):
-        student =Student.objects.get(id=id)
-        student.delete()
-        return Response (status=status.HTTP_202_ACCEPTED)
-            
+    def enroll(self, student, course_id):
+        course = Course.objects.get(id=course_id)
+        student.courses.add(course)
+
+    def post(self, request, id):
+        student = Student.objects.get(id=id)
+        action = request.data.get("action")
+        if action == "enroll":
+           course_id = request.data.get("course_id")
+           self.enroll(student, course_id)
+        return Response(status=status.HTTP_201_CREATED)
 
             
 class ClassPeriodView(APIView):
@@ -57,7 +56,7 @@ class ClassPeriodView(APIView):
         class_periods = ClassPeriod.objects.all()
         serializer = ClassPeriodSerializer(class_periods, many=True)
         return Response(serializer.data)
-class ClasstListView(APIView):
+class ClassListView(APIView):
     def get(self, request):
         classPeriod = ClassPeriod.objects.all()
         serializer = ClassPeriodSerializer(classPeriod,many=True)
@@ -124,6 +123,7 @@ class TeacherDetailView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
         
     def delete(self, request,id):
         teacher = Teacher.objects.get(id=id)
@@ -209,3 +209,23 @@ class ClassProjectDetailView(APIView):
         classProject = Class_Project.objects.get(id=id)
         classProject.delete()
         return Response (status=status.HTTP_202_ACCEPTED)
+
+
+class WeeklyTimetableView(APIView):
+    def get(self, request):
+        timetable = {}
+        class_periods = ClassPeriod.objects.all()
+
+        for class_period in class_periods:
+            day = class_period.day_of_week
+            if day not in timetable:
+                timetable[day] = []
+            
+            timetable[day].append({
+                "teacher": class_period.teacher.name,
+                "course": class_period.course.name,
+                "start_time": class_period.start_time,
+                "end_time": class_period.end_time,
+            })
+        
+        return Response(timetable, status=status.HTTP_200_OK)

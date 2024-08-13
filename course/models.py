@@ -16,7 +16,7 @@ class Course(models.Model):
     course_status = models.CharField(max_length=20)
     course_location = models.CharField(max_length=50)
     course_time = models.CharField(max_length=20)
-    ourse_students = models.ManyToManyField(Student, related_name='courses')
+    course_students = models.ManyToManyField(Student, related_name='courses')
     course_teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='courses')
     
     objects: BaseManager["Course"]
