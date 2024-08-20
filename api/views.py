@@ -242,3 +242,8 @@ class Class_PeriodDetailView(APIView):
         course = Course.objects.get(id=course_id)
         class_period = ClassPeriod(teacher=teacher, course=course)
         class_period.save()
+class WeeklyTimetable(APIView):
+    def get(self, request):
+        class_periods = ClassPeriod.objects.all()
+        serializer = ClassPeriodSerializer(class_periods, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
