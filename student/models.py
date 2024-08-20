@@ -1,8 +1,7 @@
 from django.db import models
-from django.db.models.manager import BaseManager
 
 
-# Create your models here.
+
 class Student(models.Model):
     id = models.AutoField(primary_key=True)
     first_name =models.CharField(max_length=20)
@@ -14,9 +13,10 @@ class Student(models.Model):
     bio =models.TextField()
     parentName = models.CharField(max_length=50)
     parentContact = models.CharField(max_length=20)
+    enrolled_courses = models.ManyToManyField('courses.Course', related_name='students')
     
     
-    objects: BaseManager["Student"]
+    
     
     
     def __str__(self):
