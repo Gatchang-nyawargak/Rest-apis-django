@@ -26,7 +26,7 @@ class CourseSerializer(serializers.ModelSerializer):
     teacher = TeacherSerializer()
     class Meta:
         model = Course
-        fields = "__all__"
+        fields = ['id', 'course_name', 'course_description', 'course_teacher']
 class MinimalCourseSerializer(serializers.ModelSerializer):
     class Meta:
        model = Course
@@ -43,9 +43,12 @@ class MinimalClassProjectSerializer(serializers.ModelSerializer):
 class StudentSerializer(serializers.ModelSerializer):
     courses = CourseSerializer(many = True)
     class_enrolled = ClassProjectSerializer()
+    courses = CourseSerializer(many=True, read_only=True) 
+
     class Meta:
         model = Student
-        fields = "__all__"
+        fields = ['id', 'first_name', 'last_name', 'courses']
+    
 class MinimalStudentSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     age = serializers.SerializerMethodField()
@@ -56,16 +59,16 @@ class MinimalStudentSerializer(serializers.ModelSerializer):
     def get_age(self, obj):
         if obj.date_of_birth:
             today = datetime.now()
-            # Check if date_of_birth is a date object
+            
             if isinstance(obj.date_of_birth, date) and not isinstance(obj.date_of_birth, datetime):
                 date_of_birth = datetime.combine(obj.date_of_birth, datetime.min.time())
             else:
                 date_of_birth = obj.date_of_birth
             
-            # Calculate age
+       
             age = today - date_of_birth
             return age.days // 365
-        return None  # Return None if date_of_birth is not provided
+        return None 
 
     class Meta:
         model = Student
