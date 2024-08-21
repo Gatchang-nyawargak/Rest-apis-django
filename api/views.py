@@ -11,7 +11,7 @@ from ClassProject.models import Class_Project
 
 class StudentListView(APIView):
     def get(self, request):
-        students = Student.objects.all()
+        students= Student.objects.all()
         first_name = request.query_params.get("first_name")
         if first_name:
             students = students.filter(first_name=first_name)
@@ -30,9 +30,9 @@ class StudentListView(APIView):
 
 class StudentDetailView(APIView):
     def get(self, request, id):
-        student = Student.objects.get(id=id)
-        serializer = StudentSerializer(student)
-        return Response(serializer.data)
+          student = Student.objects.get(id=id)
+          serializer = StudentSerializer(student)
+          return Response(serializer.data)
 
     def put(self, request, id):
         student = Student.objects.get(id=id)
